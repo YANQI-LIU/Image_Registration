@@ -23,8 +23,8 @@ fixed_img=fdialog.askopenfile(initialdir=tempdir, title='select the fixed image'
 # need the .name part because askopenfile returns an io.textiowrapper not the full str name
 moving_img=fdialog.askopenfile(initialdir=tempdir, title='select the moving image').name
 
-param1=fdialog.askopenfile(title='select the first parameter file', initialdir = "D:/elastix_params_backup").name
-param2=fdialog.askopenfile(title='select the second parameter file',initialdir = "D:/elastix_params_backup").name
+param1=fdialog.askopenfile(title='select the first parameter file', initialdir = "D:/elastix_params").name
+param2=fdialog.askopenfile(title='select the second parameter file',initialdir = "D:/elastix_params").name
 
 shutil.copy(param1, tempdir)
 shutil.copy(param2, tempdir)
@@ -33,6 +33,8 @@ command_line= ['elastix -f '+ fixed_img+ ' -m ' + moving_img+
                ' -out '+ tempdir+ ' -p '+ param1+
               ' -p ' + param2]
 print('formulated commandline: ' , command_line)
+
+input("Press Enter to continue...")
 
 command=['elastix', 
          '-f', fixed_img, 
@@ -43,3 +45,16 @@ command=['elastix',
         ]
 
 subprocess.run(command, cwd= 'C:/Users/liu')
+
+print('The elastix command was: ' + command_line)
+
+answer=None
+while answer not in ('y','n'):
+	answer= input('Rerun the previous elastix command?[y/n]')
+	if answer =='y':
+		subprocess.run(command, cwd= 'C:/Users/liu')
+	elif answer=='n':
+		pass
+	else:
+		print('Please enter y or n, case sensitive')
+
