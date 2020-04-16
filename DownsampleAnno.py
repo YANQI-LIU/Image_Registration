@@ -82,7 +82,8 @@ print(f'There are {len(ending_index)} endings')
 
 endings_df=resampled_annotation_df.iloc[ending_index]
 
-if 'D' in resample_file:
+m=re.search('AL...D', resample_file)
+if m :
     out_name_endings= outdir[3:]+ f'D_endings.csv'
 else:
     out_name_endings= outdir[3:]+ f'_endings.csv'
