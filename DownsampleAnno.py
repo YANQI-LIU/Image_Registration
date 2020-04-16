@@ -70,4 +70,23 @@ for lines in q:
 
 f.close()
 
-print('Done!')
+print('Downsampling annotation done.')
+
+print('Finding endings of the annotations...')
+list_parent= resampled_annotation_df['pid'].to_numpy()
+
+parent_index=np.argwhere(list_parent=='-1')
+ending_index=parent_index[:-1]+1
+ending_index=np.insert(ending_index, 0, 0)
+print(f'There are {len(ending_index)} endings')
+
+endings_df=resampled_annotation_df.iloc[ending_index]
+
+if 'D' in resample_file:
+    out_name_endings= outdir[3:]+ f'D_endings.csv'
+else:
+    out_name_endings= outdir[3:]+ f'_endings.csv'
+print(outdir+'/'+out_name_endings)
+
+np.savetxt(outdir+'/'+out_name_endings, ending_index, delimiter=",", fmt='%i')
+print('File saved in the output directory.')

@@ -82,7 +82,7 @@ imguint16=skimage.img_as_uint(tifarray2)
 coronal_planetmp= np.swapaxes(imguint16,0,2)
 coronal_plane= np.swapaxes(coronal_planetmp,1,2)
 
-out_name= outdir[3:8]+ outdir[9]+f'_{goal_xyz}um.tiff'
+out_name= outdir[3:8]+f'_{goal_xyz}um.tiff'
 
 os.chdir(outdir)
 io.imsave(out_name, coronal_plane)
