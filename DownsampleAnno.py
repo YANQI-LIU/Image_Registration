@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import re
 
 import tkinter as tk
 import tkinter.filedialog as fdialog
@@ -15,6 +16,9 @@ resampled_xyz = simpledialog.askfloat("Input", "What is the x, y and z resolutio
 goal_xyz = simpledialog.askfloat("Input", "What do you want to downsample the resolution to '(in um)' ?",
                                minvalue=10, maxvalue=100)
 
+m=re.search('\D{2}[0-9]{3}', outdir)
+name=m[0]
+
 ratioxyz=goal_xyz/resampled_xyz
 
 message = (f"Resampled annotation step size is {resampled_xyz} um in x y z. "
@@ -25,12 +29,12 @@ print(message)
 
 input("Press Enter to continue...")
 
-resampled_anno=open(resample_file,'r')
-resampled_anno_data=resampled_anno.readlines()
+with open(resample_file,'r') as resampled_anno:
+    resampled_anno_data=resampled_anno.readlines()
 # heading is stored in anno_data[2], 1st line basically useless
 
 headings=resampled_anno_data[2].rstrip('\n').replace(' ', '').split(',')
-resampled_annotations=[lines.rstrip('0 1\n').split(' ') for lines in resampled_anno_data[3:]]
+resampled_annotations=[lines[0:-5].split(' ') for lines in resampled_anno_data[3:]]
 #slight modification on replacing and stripping due to the format of the resampled swc
 
 resampled_annotation_df=pd.DataFrame(resampled_annotations, columns=headings)
@@ -53,10 +57,10 @@ ds_coordinates['z']=ds_zround
 
 q = [' '.join(x) for x in zip(ds_xround,ds_yround,ds_zround)]
 
-if 'D' in resample_file:
-    out_name= outdir[3:]+ f'D_{goal_xyz}voxel_trace_1umStepsize.txt'
+if name+'D' in resample_file:
+    out_name= name+ f'D_{goal_xyz}voxel_trace_1umStepsize.txt'
 else:
-    out_name= outdir[3:]+ f'_{goal_xyz}voxel_trace_1umStepsize.txt'
+    out_name= name+ f'_{goal_xyz}voxel_trace_1umStepsize.txt'
 print(out_name)
 input("Check the output name carefully! Press Enter to continue...")
 
@@ -82,7 +86,7 @@ print(f'There are {len(ending_index)} endings')
 
 endings_df=resampled_annotation_df.iloc[ending_index]
 
-m=re.search('AL...D', resample_file)
+m=re.search('\D{2}[0-9]{3}[D]', resample_file)
 if m :
     out_name_endings= outdir[3:]+ f'D_endings.csv'
 else:
