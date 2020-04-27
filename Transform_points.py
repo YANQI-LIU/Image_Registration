@@ -35,6 +35,22 @@ newparam=fdialog.askopenfile(initialdir=tempdir, title='select the newly generat
 #This is the newly generated inverse transformation
 tempdir_new = fdialog.askdirectory(title='Please select a output directory for your transformed points')
 
+# changing initial transform for parameter 0 to NoInitialTransform 
+transparam0_name=newparam.replace('.1', '.0')
+
+with open(transparam0_name,'r') as transparam0:
+    tparam0_data=transparam0.readlines()
+
+#saving a copy just in case
+os.rename(transparam0_name,transparam0_name[0:-4]+'_backup.txt')
+
+tparam0_data[3]='(InitialTransformParametersFileName "NoInitialTransform")\n'
+
+with open(transparam0_name,'w+') as transparam0:
+    transparam0.writelines(tparam0_data)
+print('Modifying transformparameter.0...')
+
+
 command_line= ['transformix',
                '-def',
                points_name,
