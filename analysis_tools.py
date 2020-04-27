@@ -1,5 +1,8 @@
 '''Contains tools for analysis such as make_pd and findID_origional'''
 
+import os
+import re
+
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
@@ -11,27 +14,39 @@ from skimage import io
 global atlas_labels
 atlas_labels=atlas_labels=pd.read_csv('D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2017\labels.csv')
 
-def make_pd(all_points, ending_indices,dir):
+def make_pd(allpoints, ending_indices,dir):
     ''' 
     Reads in all points as well as ending indices and formulates a pd structure.
     Input: all downsampled points (in transformix compatible format), corresponding indicies of endings 
     ouputs: a pandas dataframe with anatomical regions and their corresponding total points count and ending points count, list of atlas ID for each point
     
     '''
-    
-    atlas_name=dir+'/ara2sample_atlas/result.mhd'
-    atlas= sitk.ReadImage(atlas_name)
-    
+        
     ending_indices = np.genfromtxt(ending_indices, delimiter=',', dtype='int')
-    
-    with open(all_points,'r') as output:
+            
+    with open(allpoints,'r') as output:
         outputpoint= output.readlines()
     
     all_points=[]
-    for lines in outputpoint[2:]:
-        this_line= lines.split (' ')
-        mypoints= [int(stuff) for stuff in this_line]
-        all_points.append(mypoints)
+    
+    if 'outputpoints' in allpoints:
+        files=os.listdir(dir)
+        atlas=[i for i in files if re.search("atlas.+\.mhd",i)][0]
+        atlas_name=os.path.join(dir, atlas)
+
+        for lines in outputpoint:
+            m=re.search("(?:OutputIndexFixed = \[ )([0-9]+ [0-9]+ [0-9]+)", lines).groups(0)
+            this_line= str(m[0]).split(' ')
+            mypoints= [int(stuff) for stuff in this_line]
+            all_points.append(mypoints)
+    else:
+        atlas_name=dir+'/ara2sample_atlas/result.mhd'
+        for lines in outputpoint[2:]:
+            this_line= lines.split (' ')
+            mypoints= [int(stuff) for stuff in this_line]
+            all_points.append(mypoints)
+
+    atlas= sitk.ReadImage(atlas_name)
         
     points_in_atlas=[int(atlas[i]) for i in all_points ]
     #find an ID for all points
@@ -154,7 +169,7 @@ def make_tif(all_points,dir, axon=True):
     #for some reason, if just save stuff as tiff, it will save x planes of yz view
     #here we shift the 3rd dimension with the first dimension to obtain xy view
     if axon==True:
-        out_name=dir+'/D_DSpoints.tif'
+        out_name=dir+'/DSpoints.tif'
     else:
         out_name=dir+'/D_Dspoints.tif'
 
