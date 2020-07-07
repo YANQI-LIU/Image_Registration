@@ -65,7 +65,7 @@ def check_points(points_in_atlas):
             else: 
                 print(id_inbrain,'this index does not exist in allen reference atlas, see https://github.com/ChristophKirst/ClearMap/issues/37')
             warnings.warn('Some points do not have corresponding labels')
-    return 
+    return print('Done checking!')
 
 
 def make_tif(all_points, atlas_name, outname,axon=1):

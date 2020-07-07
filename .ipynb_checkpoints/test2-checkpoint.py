@@ -12,11 +12,13 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-name='D:\\AL110\\axons_RegionCounts.xlsx'
+
+name='D:\Complete_points\AL110axons_region_with_counts.xls'
 df=pd.read_excel(name.lstrip('\u202a'))
+df=df.sort_values(by=['Total_counts'])
 
 all_options = {
-    'GFP': ['AL110', 'Al126', 'AL131'],
+    'GFP': ['AL110', 'AL126', 'AL131','Al140' ,'AL142'],
     'mGFP': ['AL080', 'GF243'],
     'Mixed plasmid': ['AL066', 'AL092'],
 }
@@ -72,8 +74,10 @@ def set_display_children(selected_plasmids, selected_brains):
     Output('graph', 'figure'),
     [Input('brains-radio', 'value')])
 def update_graph(selected_brains):
-    name='D:\\' + selected_brains+'\\axons_RegionCounts.xlsx'
+    brain='\\' + selected_brains
+    name='D:\Complete_points' + brain + 'axons_region_with_counts.xls'
     df=pd.read_excel(name.lstrip('\u202a'))
+    df=df.sort_values(by=['Total_counts'])
     return {
         'data': [{'x':df['Total_counts'], 'y':df['acronym'], 'text':df['name'], 'type':'bar', 'orientation': 'h'
         }]

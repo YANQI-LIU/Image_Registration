@@ -218,12 +218,13 @@ def make_point_csv(all_points, points_in_atlas,out_name, axon=1):
     dspoints_unpack=pd.DataFrame((all_points), columns=['x','y','z'])
     dspoints_with_id= pd.DataFrame(zip(dspoints_unpack['x'],dspoints_unpack['y'],dspoints_unpack['z'],points_in_atlas), columns=['x','y','z','atlas_ID'])
     
+    
     if axon==1:
         out_name=out_name + '_axons.csv'
     else:
         out_name=out_name + '_dendrites.csv'
     
-    dspoints_with_id.to_csv (out_name,index=None,header=True)
+    dspoints_with_id.drop_duplicates().to_csv (out_name,index=None,header=True)
     return
 
 

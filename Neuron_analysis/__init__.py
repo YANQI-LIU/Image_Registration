@@ -21,10 +21,14 @@ atlas_labels=atlas_labels=pd.read_csv('D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2
 global fullatlas_name
 fullatlas_name='D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2017\\annotation_25.mhd'
 
-def find_mousename(dir):
-    '''find the mouse name from out dir.
+bregma= [227.5, 0,  215]
+# Bregma location of 25um atlas identified by me in x y z (points)
+# corresponds with ML, DV, AP
+
+def find_mousename(a_str):
+    '''find the mouse name from a string.
     example D:/AL142 will return AL142'''
-    m=re.search('\D{2}[0-9]{3}', dir)
+    m=re.search('\D{2}[0-9]{3}', a_str)
     return m[0]
 
 def find_crop(name):
@@ -67,11 +71,30 @@ def get_pt_natlas(dspoint_name,outdir, full=False):
         pass
     return all_points, atlas_name
 
-def whatis ():
-    '''input the ID of a brain region and returns full name and other details'''
-    x=input('what is it that you look for?')
-    index=atlas_labels.id==int(x)
-    print (f'Atlas id= {atlas_labels.id[index]}\n' 
-           f'Name= {atlas_labels.safe_name[index]}\n'
-           f'Hemisphere= {atlas_labels.hemisphere_id[index]}')
-    return
+def give_me_name(x):
+    ''' return the name of brain region give the provided id
+    will return an empty string if the id is not found in atlas label'''
+    found=atlas_labels[atlas_labels.id==x]
+    if found.size ==0:
+        out=' '
+    else:
+        out=found.safe_name.item()
+    return out
+
+def stereotaxis(data_point, ml=1):
+    '''Converts data value(1 value) to stereotaxic coordinates for 25um/pixel scale
+    outputs ML and AP positions in mm to the nearest 2 places
+    ml=1 when computing medial-lateral points(ie, x coordinate in a coronal view)
+    ml=0 when computing anterior posterior points(ie. z coordinate in a coronal view)
+    '''
+    
+    if ml==1:
+        out=  abs(bregma[0] - data_point) *25 /1000
+    else:
+        out= (bregma[2]- data_point) *25 /1000
+    return round(out,2)
+
+
+    
+    
+    
