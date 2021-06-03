@@ -11,6 +11,7 @@ import tkinter.filedialog as fdialog
 tempdir = fdialog.askdirectory(title='Please select a output directory')
 param1=fdialog.askopenfile(title='select the first parameter file', initialdir = tempdir).name
 param2=fdialog.askopenfile(title='select the second parameter file',initialdir = tempdir).name
+# this is the affine (1) and bspline(2) parameters used, found in sample2ara folder
 
 fixed_img=fdialog.askopenfile(initialdir=tempdir, title='select the fixed image').name
 coefparam=fdialog.askopenfile(initialdir=tempdir, title='select the higherorder coeficcient file').name

@@ -48,15 +48,11 @@ subprocess.run(command, cwd= 'C:/Users/liu')
 
 print('The elastix command was: ' + command_line)
 
-answer=None
-exit_this=0
-while answer not in ('y','n') and exit_this!=0:
-	answer= input('Rerun the previous elastix command?[y/n]')
-	if answer =='y':
-		subprocess.run(command, cwd= 'C:/Users/liu')
-	elif answer=='n':
-        exit_this=1
-		pass
-	else:
-		print('Please enter y or n, case sensitive')
-
+answer=input('Rerun the previous elastix command?[y/n]')
+while answer not in ('y', 'n'):
+    print('please enter y or n, case sensitive')
+    answer=input('123')
+if answer == 'y':
+    subprocess.run(command, cwd= 'C:/Users/liu')
+else: 
+    print('Finished')

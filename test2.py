@@ -7,15 +7,32 @@ import pandas as pd
 
 import plotly
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+fig = make_subplots(
+    rows=2, cols=2,
+    specs=[[{"type": "bar"}, {"type": "barpolar"}],
+           [{"type": "pie"}, {"type": "scatter3d"}]],
+)
 
-name='D:\Complete_points\AL110axons_region_with_counts.xls'
-df=pd.read_excel(name.lstrip('\u202a'))
-df=df.sort_values(by=['Total_counts'])
+fig.add_trace(go.Bar(y=[2, 3, 1]),
+              row=1, col=1)
+
+fig.add_trace(go.Barpolar(theta=[0, 45, 90], r=[2, 3, 1]),
+              row=1, col=2)
+
+fig.add_trace(go.Pie(values=[2, 3, 1]),
+              row=2, col=1)
+
+fig.add_trace(go.Scatter3d(x=[2, 3, 1], y=[0, 0, 0], 
+                           z=[0.5, 1, 2], mode="lines"),
+              row=2, col=2)
+
+fig.update_layout(height=700, showlegend=False)
 
 all_options = {
     'GFP': ['AL110', 'AL126', 'AL131','Al140' ,'AL142'],
@@ -38,14 +55,8 @@ app.layout = html.Div([
     html.Div(id='display-selected-values'),
     
     dcc.Graph(id='graph',
-              figure={
-                  'data':[{
-                      'x':df['Total_counts'], 'y':df['acronym'], 'text':df['name'], 'type':'bar', 'orientation': 'h'
-                  }]
-              }
-             )
-])
-
+              figure=fig)
+    ])
 
 @app.callback(
     Output('brains-radio', 'options'),
@@ -78,10 +89,7 @@ def update_graph(selected_brains):
     name='D:\Complete_points' + brain + 'axons_region_with_counts.xls'
     df=pd.read_excel(name.lstrip('\u202a'))
     df=df.sort_values(by=['Total_counts'])
-    return {
-        'data': [{'x':df['Total_counts'], 'y':df['acronym'], 'text':df['name'], 'type':'bar', 'orientation': 'h'
-        }]
-    }
+    return fig
 
 
 if __name__ == '__main__':

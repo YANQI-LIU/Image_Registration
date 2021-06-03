@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 
 import warnings
+import re
 
 import tkinter as tk
 import tkinter.filedialog as fdialog
@@ -57,7 +58,7 @@ def downsample_anno():
     #                              minvalue=0.0, maxvalue=100)
     #goal_xyz = simpledialog.askfloat("Input", "What do you want to downsample the resolution to '(in um)' ?",
     #                              minvalue=10, maxvalue=100)
-    name=find_mousename(outdir)
+    name=na.find_mousename(outdir)
 
     ratioxyz=goal_xyz/resampled_xyz
 

@@ -35,7 +35,7 @@ def find_crop(name):
     ''' takes in atlas or tempalte name that has xxx-xxx in its name.
     finds the missing section in z coronal plane to transform back to original full span(1-528)
     For exmaple, for atlas_104-400.mhd, will output 103,128'''
-    m= re.search("[0-9]{2,3}.[0-9]{3}",name)[0]
+    m= re.search("[0-9]{1,3}.[0-9]{3}",name)[0]
     to_add= m.split('-')
     lead= int(to_add[0])-1
     trail= 528 - int(to_add[1])+1-1

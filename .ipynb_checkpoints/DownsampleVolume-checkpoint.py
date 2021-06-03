@@ -23,7 +23,10 @@ import matplotlib.pyplot as plt
 stack=fdialog.askopenfile(initialdir='Z:\\', title='select the MaSIVed stack to be further downsampled').name                               
 
 # User input required for raw xyz resolution and goal dimension
-xy = 0.8
+
+xy = simpledialog.askfloat("Input", "What is the xy resolution '(in um)' ?",
+                               minvalue=0, maxvalue=100)
+# xy = 0.6
 z = 5
 goal_xyz = simpledialog.askfloat("Input", "What do you want to downsample the resolution to '(in um)' ?",
                                minvalue=10, maxvalue=100)
@@ -47,11 +50,9 @@ f"dowmsample ratio is xy = {ratioxy} and z = {ratioz}.")
 print(message)
 
 im = io.imread(stack)
-#reads the entire image stack into memory (huge, takes about 5min to read a 25gb stack)
 
 z,y,x= im.shape
 print (im.shape) 
-#shape is now z, y (rows), x(columns)
 
 new_rows=int(y/ratioxy)
 new_col=int(x/ratioxy)
@@ -84,7 +85,7 @@ imguint16=skimage.img_as_uint(tifarray2)
 coronal_planetmp= np.swapaxes(imguint16,0,2)
 coronal_plane= np.swapaxes(coronal_planetmp,1,2)
 
-out_name= outdir[3:8]+ outdir[9]+f'_{goal_xyz}um.tiff'
+out_name= outdir[3:8]+f'_{goal_xyz}um.tiff'
 
 os.chdir(outdir)
 io.imsave(out_name, coronal_plane)

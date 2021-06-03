@@ -8,7 +8,7 @@ import tkinter as tk
 import tkinter.filedialog as fdialog
 from tkinter import simpledialog
 
-xy = 0.8
+xy = 0.6
 z = 5
 outdir = fdialog.askdirectory(title='Please select the output directory')
 anno_file=fdialog.askopenfile(initialdir=outdir, title='Select the eswc file containing the annotations').name 

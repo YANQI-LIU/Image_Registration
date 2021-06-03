@@ -23,7 +23,10 @@ import matplotlib.pyplot as plt
 stack=fdialog.askopenfile(initialdir='Z:\\', title='select the MaSIVed stack to be further downsampled').name                               
 
 # User input required for raw xyz resolution and goal dimension
-xy = 0.8
+
+xy = simpledialog.askfloat("Input", "What is the xy resolution '(in um)' ?",
+                               minvalue=0, maxvalue=100)
+# xy = 0.6
 z = 5
 goal_xyz = simpledialog.askfloat("Input", "What do you want to downsample the resolution to '(in um)' ?",
                                minvalue=10, maxvalue=100)
