@@ -20,7 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Select the directory containing already stitched planes from stitchit (Rob code)
-stack=fdialog.askopenfile(initialdir='Z:\\', title='select the MaSIVed stack to be further downsampled').name                               
+stack=fdialog.askopenfile(initialdir='Z:\\', title='select the tiff stack to be further downsampled').name                               
 
 # User input required for raw xyz resolution and goal dimension
 
@@ -33,10 +33,13 @@ goal_xyz = simpledialog.askfloat("Input", "What do you want to downsample the re
 
 outdir = fdialog.askdirectory(title='Please select the output directory')
 
-masiv_ds=stack[stack.find('_DS')+len('_DS'):stack.rfind('.tif')]
-masiv_ds=float(masiv_ds)
-masiv_xy= round (xy*masiv_ds,2)
-print (f'MASIV stack is downsampled : {masiv_ds}, The masiv stack is : {masiv_xy} um/pixels') 
+#masiv_ds=stack[stack.find('_DS')+len('_DS'):stack.rfind('.tif')]
+#masiv_ds=float(masiv_ds)
+#masiv_xy= round (xy*masiv_ds,2)
+
+masiv_xy= xy
+
+#print (f'MASIV stack is downsampled : {masiv_ds}, The masiv stack is : {masiv_xy} um/pixels') 
 # note that this gives a float and have many decimal places which the end digit is non-zero
 # for avoiding confusion we keep the 2 decimal places
 
