@@ -111,3 +111,54 @@ def make_tif(all_points, atlas_name, outname,axon=1):
 
     io.imsave(out_name,coronal_planetmp)
     return 
+
+
+def make_tif_1(all_points, atlas_name, outname,axon=1):
+    ''' Project downsampled points on to a tiff stack, useful for overlaping with brain or template (ie, in imageJ)
+    
+    August 18 2021
+    Slightly modified version where each pixel will have a value of 1, instead of actual number of points.
+    Useful for visualization (ie. max projection) so that all pixel axon or dendrite is equally strong in intensity
+    
+    
+    input: downsampled points in a list containing x y z ordinates as int, directory containing it (this is also the output directory) and whether annotation is axon or not (default True)
+    example: [[12, 13, 25],
+             [13, 14, 25],...]
+    
+    output: a tiff stack with the same dimensions of the brain/template/atlas mhd files with downsampled points only
+    each point has a value of the number of occurences (since downsampling combines multiple points as one)
+    '''
+        
+    print('Starting to saving tif files..')
+    
+    atlas= sitk.ReadImage(atlas_name)
+    svolume=np.zeros(atlas.GetSize())
+    #columns, rows, planes
+    
+    zplanes=[]
+    for i in all_points:
+        zplanes.append( i[2])
+    zplanes=np.unique(zplanes)
+    temp=np.zeros(atlas.GetSize()[0:2])
+    thepoints=np.asarray(all_points)
+
+    for i in zplanes:
+        index= thepoints[:,2]==i
+        uindex,counts=np.unique(thepoints[index],return_counts=True, axis=0)
+        for lines in uindex:
+            coord1,coord2=lines[0:2]
+            temp[coord1][coord2]= 1
+        svolume[:,:,i]=temp #write this in 
+        temp=np.zeros(atlas.GetSize()[0:2]) #reset the empty plane after each z
+        
+    
+    coronal_planetmp= np.swapaxes(np.int16(svolume),0,2)
+    #for some reason, if just save stuff as tiff, it will save x planes of yz view
+    #here we shift the 3rd dimension with the first dimension to obtain xy view
+    if axon==1:
+        out_name=outname + '_axons.tif'
+    else:
+        out_name=outname + '_dendrites.tif'
+
+    io.imsave(out_name,coronal_planetmp)
+    return 

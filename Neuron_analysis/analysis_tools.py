@@ -38,35 +38,20 @@ def find_mousename(dir):
     m=re.search('\D{2}[0-9]{3}', dir)
     return m[0]
 
-def convert_anno():
-    xy = 0.8
-    z = 5
-    outdir = fdialog.askdirectory(title='Please select the output directory')
-    anno_file=fdialog.askopenfile(initialdir=outdir, title='Select the eswc file containing the annotations').name 
-    print('Converting pixels to ums....')
-
-    anno=open(anno_file,'r')
-    anno_data=anno.readlines()
+def read_eswc():
+    # read the final version of eswc file generated from vaa3d, after convert to real physical distances and resampled
+    # return headings and annotations in list forms
+    resample_file=fdialog.askopenfile(title='Select the final converted and resampled eswc file').name 
+        
+    with open(resample_file,'r') as resampled_anno:
+        resampled_anno_data=resampled_anno.readlines()
     # heading is stored in anno_data[2], 1st line basically useless
 
-    headings=anno_data[2].rstrip('\n').split(' ')
-    annotations=[lines.rstrip('\n').split(' ') for lines in anno_data[3:]]
+    headings=resampled_anno_data[2].rstrip('\n').replace(' ', '').split(',')
+    annotations=[lines[0:-5].split(' ') for lines in resampled_anno_data[3:]]
+    #slight modification on replacing and stripping due to the format of the resampled swc
 
-    annotation_df=pd.DataFrame(annotations, columns=headings)
-
-    annotation_df['x']=pd.to_numeric(annotation_df['x'])*xy
-    annotation_df['y']=pd.to_numeric(annotation_df['y'])*xy
-    annotation_df['z']=pd.to_numeric(annotation_df['z'])*z
-
-    tfile = open(anno_file+'converted.eswc', 'a')
-    tfile.write(anno_data[0])
-    tfile.write(anno_data[1])
-    tfile.write(anno_data[2])
-    tfile.write(annotation_df.to_string(header=False, index=False))
-    tfile.close()
-
-    print('Done!')
-    return
+    return headings, annotations
 
 def downsample_anno():
     ''' Downsample the annotation that has been already converted to um and resampled
@@ -294,43 +279,3 @@ def findID_origional(origional_points, points_in_atlas,dir,axon=True):
     points_with_id['colour'] = points_with_id['atlasID'].map(colourdict)
     return points_with_id
 
-def make_tif(all_points, atlas_name, dir,axon=True):
-    ''' Project downsampled points on to a tiff stack, useful for overlaping with brain or template (ie, in imageJ)
-    input: downsampled points, directory containing it (this is also the output directory) and whether annotation is axon or not (default True)
-    output: a tiff stack with the same dimensions of the brain/template/atlas mhd files with downsampled points only
-    each point has a value of the number of occurences (since downsampling combines multiple points as one)
-    '''
-        
-    print('Starting to saving tif files..')
-    
-    atlas= sitk.ReadImage(atlas_name)
-    svolume=np.zeros(atlas.GetSize())
-    #columns, rows, planes
-    
-    zplanes=[]
-    for i in all_points:
-        zplanes.append( i[2])
-    zplanes=np.unique(zplanes)
-    temp=np.zeros(atlas.GetSize()[0:2])
-    thepoints=np.asarray(all_points)
-
-    for i in zplanes:
-        index= thepoints[:,2]==i
-        uindex,counts=np.unique(thepoints[index],return_counts=True, axis=0)
-        for j, lines in enumerate(uindex):
-            coord1,coord2=lines[0:2]
-            temp[coord1][coord2]= counts[j]
-        svolume[:,:,i]=temp #write this in 
-        temp=np.zeros(atlas.GetSize()[0:2]) #reset the empty plane after each z
-        
-    
-    coronal_planetmp= np.swapaxes(np.int16(svolume),0,2)
-    #for some reason, if just save stuff as tiff, it will save x planes of yz view
-    #here we shift the 3rd dimension with the first dimension to obtain xy view
-    if axon==True:
-        out_name=dir+'/DSpoints.tif'
-    else:
-        out_name=dir+'/D_Dspoints.tif'
-
-    io.imsave(out_name,coronal_planetmp)
-    return 

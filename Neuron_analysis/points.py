@@ -17,6 +17,7 @@ from skimage import io
 
 def convert_anno():
     xy = 0.6
+    # 0.8 for 2pt samples, 0.6 for COLM images
     z = 5
     outdir = fdialog.askdirectory(title='Please select the output directory')
     anno_file=fdialog.askopenfile(initialdir=outdir, title='Select the eswc file containing the annotations').name 
@@ -114,25 +115,25 @@ def downsample_anno():
 
     print('Downsampling annotation done.')
 
-    print('Finding endings of the annotations...')
-    list_parent= resampled_annotation_df['pid'].to_numpy()
+#     print('Finding endings of the annotations...')
+#     list_parent= resampled_annotation_df['pid'].to_numpy()
 
-    parent_index=np.argwhere(list_parent=='-1')
-    ending_index=parent_index[:-1]+1
-    ending_index=np.insert(ending_index, 0, 0)
-    print(f'There are {len(ending_index)} endings')
+#     parent_index=np.argwhere(list_parent=='-1')
+#     ending_index=parent_index[:-1]+1
+#     ending_index=np.insert(ending_index, 0, 0)
+#     print(f'There are {len(ending_index)} endings')
 
-    endings_df=resampled_annotation_df.iloc[ending_index]
+#     endings_df=resampled_annotation_df.iloc[ending_index]
 
-    m=re.search('\D{2}[0-9]{3}[D]', resample_file)
-    if m :
-        out_name_endings= outdir[3:]+ f'D_endings.csv'
-    else:
-        out_name_endings= outdir[3:]+ f'_endings.csv'
-    print(outdir+'/'+out_name_endings)
+#     m=re.search('\D{2}[0-9]{3}[D]', resample_file)
+#     if m :
+#         out_name_endings= outdir[3:]+ f'D_endings.csv'
+#     else:
+#         out_name_endings= outdir[3:]+ f'_endings.csv'
+#     print(outdir+'/'+out_name_endings)
 
-    np.savetxt(outdir+'/'+out_name_endings, ending_index, delimiter=",", fmt='%i')
-    print('File saved in the output directory.')
+#     np.savetxt(outdir+'/'+out_name_endings, ending_index, delimiter=",", fmt='%i')
+#     print('File saved in the output directory.')
     return
 
 def refill_section(all_points,name):
@@ -185,6 +186,56 @@ def make_pd(all_points, ending_indices,out_name, axon=1):
     our_regionWcounts.to_excel(out_name,index=None,header=True)
 
     return our_regionWcounts.sort_values(by=['Total_counts']), points_in_atlas
+
+
+def find_point_id(points, atlas_name):
+    
+    ''' 
+    August 18 2021 update
+    For ara2sample only
+    Takes in all points (as a list, usually the output of na.refill_section or na.get_pt_natlas ) and formulates a pd structure.
+    Input: downsampled points (in transformix compatible format), name of corresponding atlas
+    ouputs:list of atlas ID for each point
+    
+    '''
+    
+    image= sitk.ReadImage(atlas_name)
+    atlas =sitk.GetArrayFromImage(image)
+        
+    points_in_atlas=[int(atlas[i[2], i[1],i[0]]) for i in points]
+    #find an ID for all points
+    return points_in_atlas
+    
+
+def make_pd_ara2sample(points_in_atlas, atlas_labels, out_name, axon=1):
+    ''' 
+    August 18 2021 update
+    For ara2sample only
+    Takes in all points (as a list, usually the output of na.refill_section or na.get_pt_natlas ) and formulates a pd structure.
+    Input: downsampled points (in transformix compatible format) and name of corresponding atlas
+    ouputs: a pandas dataframe with anatomical regions and their corresponding total points count and ending points count
+    
+    '''
+    unique_id=set(points_in_atlas)
+
+    our_regions=atlas_labels.loc[atlas_labels['region_id'].isin (unique_id)]
+
+    id_withcounts=[]
+    for i in unique_id:
+        id_withcounts.append([i, points_in_atlas.count(i)])
+
+    new_df= pd.DataFrame(id_withcounts, columns=['region_id', 'Total_counts'])
+    our_regionWcounts=pd.merge(our_regions, new_df)
+    
+    if axon==1:
+        out_name=out_name + 'axons_region_with_counts.xls'
+    else:
+        out_name=out_name + 'dendrites_region_with_counts.xls'
+    
+    our_regionWcounts.to_excel(out_name,index=None,header=True)
+
+    return our_regionWcounts.sort_values(by=['Total_counts'])
+
 
 def check_points(points_in_atlas):
     '''Checks whether all your points' ID is within the atlas labels

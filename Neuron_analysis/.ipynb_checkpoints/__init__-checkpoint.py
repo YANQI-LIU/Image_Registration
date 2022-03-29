@@ -19,7 +19,7 @@ global atlas_labels
 atlas_labels=atlas_labels=pd.read_csv('D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2017\labels.csv')
 
 global fullatlas_name
-fullatlas_name='D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2017\\annotation_25.mhd'
+fullatlas_name='D:\Allenbrainatlas\ARA_25_micron_mhd_ccf2017\wraped\\annotation_25_horizontal.mhd'
 
 bregma= [227.5, 0,  215]
 # Bregma location of 25um atlas identified by me in x y z (points)
@@ -35,11 +35,11 @@ def find_crop(name):
     ''' takes in atlas or tempalte name that has xxx-xxx in its name.
     finds the missing section in z coronal plane to transform back to original full span(1-528)
     For exmaple, for atlas_104-400.mhd, will output 103,128'''
-    m= re.search("[0-9]{1,3}.[0-9]{3}",name)[0]
+    m= re.search("[0-9]{1,3}.[0-9]{1,3}",name)[0]
     to_add= m.split('-')
     lead= int(to_add[0])-1
-    trail= 528 - int(to_add[1])+1-1
-    return lead, trail
+    #trail= 528 - int(to_add[1])+1-1
+    return lead
 
 def get_pt_natlas(dspoint_name,outdir, full=False):
     '''Read the downsampled points and get the corresponding atlas name
@@ -78,7 +78,7 @@ def give_me_name(x):
     if found.size ==0:
         out=' '
     else:
-        out=found.safe_name.item()
+        out=found.acronym.item()
     return out
 
 def stereotaxis(data_point, ml=1):
